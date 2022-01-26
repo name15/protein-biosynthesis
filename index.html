@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Protein biosynthesis</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+      main {
+        font-family: "Courier New", Courier, monospace;
+        font-size: x-large;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+      td {
+        white-space: nowrap;
+      }
+      input[type="text"] {
+        font-family: "Courier New", Courier, monospace;
+        font-size: x-large;
+      }
+      .d-flex {
+        align-items: center;
+      }
+      .d-flex > * {
+        margin: 0.33em;
+      }
+
+      #language {
+        position: absolute;
+        top: 5px;
+        right: 7px;
+        font-size: x-large;
+      }
+      .invalid {
+        font-weight: bold;
+        color: red;
+        background-color: rgb(255, 200, 200);
+      }
+      #error {
+        font-weight: bold;
+        font-size: large;
+        color: red;
+      }
+    </style>
+    <script>
+      function selectLanguage(language) {
+        if (language == "en") document.title = "Protein biosynthesis";
+        else if (language == "de") document.title = "Proteinbiosynthese";
+        else throw `Language '${language}' unavailable.`;
+
+        document.querySelectorAll("[lang]").forEach((element) => {
+          element.hidden = element.lang != language;
+        });
+      }
+
+      function template(codingStrand) {
+        let antiparallel = (nucleotide) => {
+          switch (nucleotide) {
+            case "A":
+              return "T";
+            case "C":
+              return "G";
+            case "T":
+              return "A";
+            case "G":
+              return "C";
+            default:
+              throw `Transcription error: Invalid nucleotide '${nucleotide}'.`;
+          }
+        };
+
+        let templateStrand = "";
+        for (var i = 0; i < codingStrand.length; i++) {
+          let char = codingStrand[i];
+          templateStrand += antiparallel(char);
+        }
+
+        return templateStrand;
+      }
+
+      function transcribe(templateStrand) {
+        return templateStrand.replaceAll("T", "U");
+      }
+
+      function translate(mRNA) {
+        let codonDictionary = {
+          UUU: "Phe",
+          UUC: "Phe",
+          UUA: "Leu",
+          UUG: "Leu",
+
+          UCU: "Ser",
+          UCC: "Ser",
+          UCA: "Ser",
+          UCG: "Ser",
+
+          UAU: "Tyr",
+          UAC: "Tyr",
+          UAA: "Stop",
+          UAG: "Stop",
+
+          UGU: "Cys",
+          UGC: "Cys",
+          UGA: "Stop",
+          UGG: "Trp",
+
+          CUU: "Leu",
+          CUC: "Leu",
+          CUA: "Leu",
+          CUG: "Leu",
+
+          CCU: "Pro",
+          CCC: "Pro",
+          CCA: "Pro",
+          CCG: "Pro",
+
+          CAU: "His",
+          CAC: "His",
+          CAA: "Gln",
+          CAG: "Gln",
+
+          CGU: "Arg",
+          CGC: "Arg",
+          CGA: "Arg",
+          CGG: "Arg",
+
+          AUU: "Ile",
+          AUC: "Ile",
+          AUA: "Ile",
+          AUG: "Met",
+
+          ACU: "Thr",
+          ACC: "Thr",
+          ACA: "Thr",
+          ACG: "Thr",
+
+          AAU: "Asn",
+          AAC: "Asn",
+          AAA: "Lys",
+          AAG: "Lys",
+
+          AGU: "Ser",
+          AGC: "Ser",
+          AGA: "Arg",
+          AGG: "Arg",
+
+          GUU: "Val",
+          GUC: "Val",
+          GUA: "Val",
+          GUG: "Val",
+
+          GCU: "Ala",
+          GCC: "Ala",
+          GCA: "Ala",
+          GCG: "Ala",
+
+          GAU: "Asp",
+          GAC: "Asp",
+          GAA: "Glu",
+          GAG: "Glu",
+
+          GGU: "Gly",
+          GGC: "Gly",
+          GGA: "Gly",
+          GGG: "Gly",
+        };
+
+        let aminoAcids = [];
+        for (var i = 0; i < Math.floor(mRNA.length / 3); i++) {
+          let codon = mRNA.slice(i * 3, i * 3 + 3);
+          let aminoAcid = codonDictionary[codon];
+          if (!aminoAcid) throw `Invalid codon '${codon}'.`;
+          aminoAcids.push(aminoAcid);
+        }
+        return aminoAcids;
+      }
+    </script>
+  </head>
+  <body>
+    <div id="language" class="dropdown">
+      <button
+        type="button"
+        class="btn btn-primary dropdown-toggle"
+        data-toggle="dropdown"
+      >
+        <span lang="en">Language</span>
+        <span lang="de" hidden>Sprache</span>
+      </button>
+      <div class="dropdown-menu dropdown-menu-right">
+        <div class="dropdown-item" onclick="selectLanguage('en')">English</div>
+        <div class="dropdown-item" onclick="selectLanguage('de')">Deutsch</div>
+      </div>
+    </div>
+    <main>
+      <table>
+        <tr>
+          <td>
+            <span lang="en">Coding strand:&nbsp;</span>
+            <span lang="de" hidden>Codogener Strang:&nbsp;</span>
+          </td>
+          <td class="d-flex">
+            <span>5' -</span>
+            <input type="text" id="coding" class="form-control" autofocus />
+            <span>- 3'</span>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span lang="en">Template strand:&nbsp;</span>
+            <span lang="de" hidden>Nicht-codogener Strang:&nbsp;</span>
+          </td>
+          <td class="d-flex">
+            <span>3' -</span>
+            <input type="text" id="template" class="form-control" disabled />
+            <span>- 5'</span>
+          </td>
+        </tr>
+        <tr>
+          <td>mRNA:&nbsp;</td>
+          <td class="d-flex">
+            <span>3' -</span>
+            <input type="text" id="rna" class="form-control" disabled />
+            <span>- 5'</span>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span lang="en">Amino acids:&nbsp;</span>
+            <span lang="de" hidden>Aminosäuren:&nbsp;</span>
+          </td>
+          <td class="d-flex">
+            <input type="text" id="aminoAcids" class="form-control" disabled />
+          </td>
+        </tr>
+      </table>
+
+      <p id="error" hidden>
+        <span lang="en"
+          >Invalid DNA sequence: Enter only the letters 'A', 'T', 'G' or
+          'C'.</span
+        >
+        <span lang="de" hidden
+          >Ungültige DNA-Sequenz: Geben Sie nur die Buchstaben 'A', 'T', 'G'
+          oder 'C' ein.</span
+        >
+      </p>
+    </main>
+    <script>
+      const codingStrandInput = document.querySelector("#coding");
+      const templateStrandOutput = document.querySelector("#template");
+      const mRNAOutput = document.querySelector("#rna");
+      const aminoAcidsOutput = document.querySelector("#aminoAcids");
+      const errorParagraph = document.querySelector("#error");
+
+      codingStrandInput.oninput = (event) => {
+        codingStrandInput.value = codingStrandInput.value.toUpperCase();
+        try {
+          templateStrandOutput.value = template(codingStrandInput.value);
+          mRNAOutput.value = transcribe(templateStrandOutput.value);
+          aminoAcidsOutput.value = `${translate(mRNAOutput.value).join(
+            ", "
+          )} ${".".repeat(mRNAOutput.value.length % 3)}`;
+          codingStrandInput.classList.remove("invalid");
+          errorParagraph.hidden = true;
+        } catch (error) {
+          console.error(error);
+          errorParagraph.hidden = false;
+          codingStrandInput.classList.add("invalid");
+        }
+      };
+    </script>
+  </body>
+</html>
